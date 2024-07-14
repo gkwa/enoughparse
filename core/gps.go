@@ -38,7 +38,5 @@ func ExtractGPSCoordinates(imagePath string, logger logr.Logger) (*GPSInfo, erro
 		Longitude: lon,
 	}
 
-	logger.V(1).Info("Extracted GPS coordinates", "gpsInfo", gpsInfo.String())
-
 	return gpsInfo, nil
 }
