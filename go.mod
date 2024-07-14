@@ -3,6 +3,7 @@ module github.com/gkwa/enoughparse
 go 1.22.4
 
 require (
+	github.com/barasher/go-exiftool v1.10.0
 	github.com/fatih/color v1.17.0
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/go-logr/logr v1.4.2

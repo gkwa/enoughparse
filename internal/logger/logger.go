@@ -15,7 +15,7 @@ import (
 	runtimeLog "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-func NewConsoleLogger(verbose bool, jsonFormat bool) logr.Logger {
+func NewConsoleLogger(verbosity int, jsonFormat bool) logr.Logger {
 	var zlog zerolog.Logger
 
 	zerolog.CallerMarshalFunc = func(pc uintptr, file string, line int) string {
@@ -29,30 +29,39 @@ func NewConsoleLogger(verbose bool, jsonFormat bool) logr.Logger {
 	if jsonFormat {
 		zlog = zerolog.New(os.Stderr).With().Timestamp().Caller().Logger()
 	} else {
-		color.NoColor = !verbose
+		color.NoColor = verbosity == 0
 		consoleWriter := zerolog.ConsoleWriter{
 			Out:        os.Stderr,
-			NoColor:    !verbose,
+			NoColor:    verbosity == 0,
 			TimeFormat: time.Kitchen,
 		}
 
-		if !verbose {
+		if verbosity == 0 {
 			consoleWriter.PartsExclude = []string{zerolog.TimestampFieldName}
 		}
 
 		zlog = zerolog.New(consoleWriter).With().Timestamp().Caller().Logger()
 	}
 
-	if verbose {
-		zlog = zlog.Level(zerolog.DebugLevel)
-	} else {
+	switch {
+	case verbosity == 0:
 		zlog = zlog.Level(zerolog.InfoLevel)
+	case verbosity == 1:
+		zlog = zlog.Level(zerolog.DebugLevel)
+	case verbosity == 2:
+		zlog = zlog.Level(zerolog.TraceLevel)
+	case verbosity >= 3:
+		zlog = zlog.Level(zerolog.TraceLevel)
+		zerolog.SetGlobalLevel(zerolog.TraceLevel)
 	}
 
 	gcrLog.Warn.SetOutput(io.Discard)
 
 	zerologr.VerbosityFieldName = "v"
-	log := zerologr.New(&zlog)
+	zerologr.NameFieldName = "logger"
+	zerologr.NameSeparator = "/"
+
+	log := zerologr.New(&zlog).WithName("root")
 
 	runtimeLog.SetLogger(log)
 
