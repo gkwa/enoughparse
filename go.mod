@@ -2,7 +2,7 @@ module github.com/gkwa/enoughparse
 
 go 1.26.0
 
-toolchain go1.26.4
+toolchain go1.26.5
 
 require (
 	github.com/barasher/go-exiftool v1.10.0
